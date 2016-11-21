@@ -1,0 +1,52 @@
+<html>
+<head>
+  <style type="text/less">
+  #container {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    align-content: stretch;
+    height: 100vh;
+    width: 100vw;
+  }
+  
+  #ta {
+    flex: 1 1 auto;
+  }
+  </style>
+</head>
+<body>
+  <webview id="webviewTest" src="https://www.github.com/" style="display:inline-flex; width:640px; height:480px"></webview>
+  <div id="container">
+    <textarea id="ta"></textarea>
+    <div id="info">
+      <h3>Type some text!</h3>
+      <p id="detectedLang">Unknown language</p>
+      <img height="33%"
+      src="http://pixel.nymag.com/imgs/daily/following/2016/05/12/12376681_1063072477089016_3145722177588178860_n.nocrop.w536.h2147483647.2x.jpg" />
+    </div>
+  </div>
+  
+  <script>
+  import SpellCheckHandler from '../src/spell-check-handler';
+  import ContextMenuListener from '../src/context-menu-listener';
+  import ContextMenuBuilder from '../src/context-menu-builder';
+
+  const webview = document.getElementById('webviewTest');
+
+  webview.spellCheckHandler = new SpellCheckHandler();
+  webview.spellCheckHandler.attachToInput();
+  webview.spellCheckHandler.currentSpellcheckerChanged.subscribe(() => {
+    document.getElementById('detectedLang').innerText = `Current language is ${webview.spellCheckHandler.currentSpellcheckerLanguage}`;
+  });
+  
+  webview.spellCheckHandler.provideHintText('This is probably the language that you want to check in');
+  webview.spellCheckHandler.autoUnloadDictionariesOnBlur();
+  
+  let contextMenuBuilder = new ContextMenuBuilder(webview.spellCheckHandler, webview);
+  let contextMenuListener = new ContextMenuListener(async (info) => {
+    await contextMenuBuilder.showPopupMenu(info);
+  }, webview);
+  </script>
+</body>
+</html>
